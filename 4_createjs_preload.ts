@@ -33,7 +33,7 @@ function init() {
 	var stage = new createjs.Stage("myCanvas");
 
 	// FontAwesome 4.4 が取り得る文字コードは 61440〜62080 の間
-	for (var i = 0; i < 641; i++) {
+	for (let i = 0; i < 641; i++) {
 		// Unicode から文字コードに変換
 		var iconInt = 61440 + i;
 		// 文字コードから文字列に変換する

@@ -18,7 +18,7 @@ module demo {
 
 	const ROUND:number = 2000;
 	const CAMERA_POSITION:number = 2500;
-	var COLOR_LIST:Array<number> = [0x003399, 0x0066CC, 0x0099FF, 0x33CCFF];
+	const COLOR_LIST:Array<number> = [0x003399, 0x0066CC, 0x0099FF, 0x33CCFF];
 
 	/**
 	 * 初期化前に必要な素材を読み込みます。
@@ -71,7 +71,7 @@ module demo {
 		// --------------------------------
 
 		// FontAwesome 4.4 が取り得る文字コードは 61440〜62080 の間
-		for (var i = 0; i < 641; i++) {
+		for (let i = 0; i < 641; i++) {
 			// Unicode から文字コードに変換
 			var iconInt = 61440 + i;
 			// 文字コードから文字列に変換する
