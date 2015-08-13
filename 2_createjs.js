@@ -14,7 +14,7 @@ function init() {
     var iconStr = String.fromCharCode(iconInt);
     console.log(iconStr); // 該当のアイコン文字
     // CreateJS のテキストを作成
-    var text = new createjs.Text(iconStr, "42px FontAwesome", "black");
+    var text = new createjs.Text(iconStr, "540px FontAwesome", "black");
     stage.addChild(text);
     // 画面のアップデート
     createjs.Ticker.addEventListener("tick", stage);
