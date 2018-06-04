@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "format": "prettier --write '*.js'"
+    "format": "prettier --write '*.{js,css}'"
   },
   "dependencies": {
     "@types/createjs": "^0.0.29",
