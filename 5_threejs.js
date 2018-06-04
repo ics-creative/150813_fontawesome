@@ -16,7 +16,7 @@ function preload() {
       families: ["FontAwesome"],
       // CSS の URL を指定
       urls: [
-        "http://netdna.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.css"
+        "https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css"
       ],
       // 他のフォントでは不要だが、FontAwesome のフォントを利用するには必要な指定
       testStrings: {
