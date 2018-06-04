@@ -1,2 +1,6 @@
 .idea
 *.js.map
+node_modules
+.vscode
+.DS_Store
+yarn.lock
