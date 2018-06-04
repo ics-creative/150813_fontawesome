@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "sourceMap": false,
+    // TSはECMAScript 5に変換
+    "target": "es2018",
+    // TSのモジュールはES Modulesとして出力
+    "module": "es2015",
+    // import Vue from 'vue' の書き方を許容する
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "dom",
+      "es2018"
+    ],
+    // デコレーターを有効に設定
+    "experimentalDecorators": true
+  }
+}
