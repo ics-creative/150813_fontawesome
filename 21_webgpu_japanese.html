@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>21. WebGPUで日本語を表示</title>
+    <link rel="stylesheet" href="common.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.webgpu.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three/webgpu";
+      import { loadReggaeOneFont } from "./font-reggae-one.js";
+
+      const sampleText = "日本語";
+      const subText = "WebGPU";
+
+      // scene はオブジェクト全体の入れ物です。
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x000000);
+
+      // camera は平面と床が同時に見える位置に置きます。
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        1,
+        1000,
+      );
+      camera.position.set(0, 28, 120);
+
+      // renderer が WebGPU へ実際の描画を流します。
+      const renderer = new THREE.WebGPURenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      await renderer.init();
+
+      // リサイズ時は camera と renderer の両方を更新します。
+      window.addEventListener("resize", handleResize);
+
+      // Google Fonts 配信のフォントファイルを FontFace で登録してから描画します。
+      await loadReggaeOneFont();
+
+      // フォント読み込み後に texture と mesh を作ります。
+      const mesh = init();
+
+      // 単体デモでも空間の基準が見えるように床を追加します。
+      const grid = new THREE.GridHelper(240, 12);
+      grid.position.y = -24;
+      scene.add(grid);
+
+      // アニメーションループの中で毎フレーム回転させます。
+      renderer.setAnimationLoop(render);
+
+      /**
+       * コンテンツを初期化します。
+       *
+       * @returns {THREE.Mesh}
+       */
+      function init() {
+        // Canvas 要素へ描いた日本語テキストを texture の元データにします。
+        const textCanvas = document.createElement("canvas");
+        const textContext = textCanvas.getContext("2d");
+
+        // texture 用 canvas は固定サイズで用意します。
+        textCanvas.width = 1024;
+        textCanvas.height = 512;
+        textContext.fillStyle = "#ffffff";
+        textContext.textAlign = "center";
+        textContext.textBaseline = "middle";
+        textContext.font = '180px "Reggae One"';
+        textContext.fillText(sampleText, 512, 190);
+        textContext.font = '88px "Reggae One"';
+        textContext.fillText(subText, 512, 340);
+
+        // Three.js のテクスチャへ展開します。
+        const texture = new THREE.CanvasTexture(textCanvas);
+        texture.needsUpdate = true;
+
+        // 平面を作成します。
+        const geometry = new THREE.PlaneGeometry(80, 40);
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+
+        // メッシュを作成して 3D 空間へ追加します。
+        const nextMesh = new THREE.Mesh(geometry, material);
+        nextMesh.position.y = 16;
+        scene.add(nextMesh);
+        return nextMesh;
+      }
+
+      function render() {
+        // x と y の両方を回すと平面でも立体感が出ます。
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+
+        // 視点は文字と床の中間を見るように固定します。
+        camera.lookAt(0, 10, 0);
+        renderer.render(scene, camera);
+      }
+
+      function handleResize() {
+        // 画面サイズの変化に合わせて投影行列を作り直します。
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    </script>
+  </head>
+  <body class="is-scene"></body>
+</html>

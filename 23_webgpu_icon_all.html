@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>5. WebGPU空間に並べる</title>
+    <title>23. WebGPUでアイコン一覧を表示</title>
     <link rel="stylesheet" href="common.css" />
     <script type="importmap">
       {
@@ -14,18 +14,43 @@
     </script>
     <script type="module">
       import * as THREE from "three/webgpu";
-      import { loadIconFont } from "./fontawesome-font.js";
-      import { loadDemoUnicodes } from "./fontawesome-list.js";
+      import { loadIconFont } from "./font-fontawesome.js";
+      import { demoIcons } from "./font-fontawesome-list.js";
 
-      // 回転の半径とカメラの周回半径を定数でまとめます。
+      /**
+       * アイコン群を上下方向へばらす半径です。
+       *
+       * @type {number}
+       */
       const ROUND = 2000;
-      const CAMERA_POSITION = 2500;
-      const COLOR_LIST = [0x003399, 0x0066cc, 0x0099ff, 0x33ccff];
-      const wraps = [];
-      const words = [];
 
-      // 一覧用の unicode 群を先に取得します。
-      const demoUnicodes = await loadDemoUnicodes();
+      /**
+       * カメラの周回半径です。
+       *
+       * @type {number}
+       */
+      const CAMERA_POSITION = 2500;
+
+      /**
+       * 各アイコン平面に割り当てる色の候補です。
+       *
+       * @type {number[]}
+       */
+      const COLOR_LIST = [0x003399, 0x0066cc, 0x0099ff, 0x33ccff];
+
+      /**
+       * 全体回転用の親ノードを保持します。
+       *
+       * @type {THREE.Object3D[]}
+       */
+      const wraps = [];
+
+      /**
+       * 個別回転させるアイコン平面を保持します。
+       *
+       * @type {THREE.Mesh[]}
+       */
+      const iconMeshes = [];
 
       // glyph を canvas へ描く前に webfont を準備します。
       await loadIconFont();
@@ -48,29 +73,9 @@
       document.body.appendChild(renderer.domElement);
       await renderer.init();
 
-      demoUnicodes.forEach((unicode) => {
-        // 各 glyph を個別の canvas texture にして plane へ貼ります。
-        const iconCanvas = document.createElement("canvas");
-        const iconContext = iconCanvas.getContext("2d");
-
-        // 1 glyph ごとに同じ texture サイズを使います。
-        iconCanvas.width = 256;
-        iconCanvas.height = 256;
-        iconContext.font = '900 200px "Font Awesome 7 Free"';
-        iconContext.fillStyle = "#ffffff";
-        iconContext.textAlign = "center";
-        iconContext.textBaseline = "middle";
-        iconContext.fillText(String.fromCodePoint(parseInt(unicode, 16)), 128, 128);
-
-        const texture = new THREE.CanvasTexture(iconCanvas);
-        const geometry = new THREE.PlaneGeometry(200, 200);
-        const material = new THREE.MeshBasicMaterial({
-          color: COLOR_LIST[(COLOR_LIST.length * Math.random()) >> 0],
-          map: texture,
-          transparent: true,
-          side: THREE.DoubleSide,
-        });
-        const mesh = new THREE.Mesh(geometry, material);
+      // 文字列配列から順に icon plane を作って、空間へ配置します。
+      demoIcons.forEach((icon) => {
+        const mesh = createIconMesh(icon);
 
         mesh.position.z = 1000 * Math.random() + 500;
         mesh.rotation.y = Math.PI * 2 * Math.random();
@@ -82,7 +87,7 @@
 
         // 全体回転用の wrap と個別回転用の mesh を別配列で持ちます。
         wraps.push(wrap);
-        words.push(mesh);
+        iconMeshes.push(mesh);
         scene.add(wrap);
       });
 
@@ -96,14 +101,53 @@
 
       // 毎フレーム、全体回転とカメラ移動を更新します。
       renderer.setAnimationLoop(render);
+
+      /**
+       * 1 glyph 分のテクスチャ付き平面を作ります。
+       *
+       * @param {string} icon
+       * @returns {THREE.Mesh}
+       */
+      function createIconMesh(icon) {
+        // 各 glyph を個別の canvas texture にして plane へ貼ります。
+        const iconCanvas = document.createElement("canvas");
+        const iconContext = iconCanvas.getContext("2d");
+
+        // 1 glyph ごとに同じ texture サイズを使います。
+        iconCanvas.width = 256;
+        iconCanvas.height = 256;
+        iconContext.font = '900 200px "Font Awesome 7 Free"';
+        iconContext.fillStyle = "#ffffff";
+        iconContext.textAlign = "center";
+        iconContext.textBaseline = "middle";
+        iconContext.fillText(icon, 128, 128);
+
+        // Canvas の内容をそのまま平面テクスチャへ変換します。
+        const texture = new THREE.CanvasTexture(iconCanvas);
+        const geometry = new THREE.PlaneGeometry(200, 200);
+        const material = new THREE.MeshBasicMaterial({
+          color: COLOR_LIST[(COLOR_LIST.length * Math.random()) >> 0],
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+
+        return new THREE.Mesh(geometry, material);
+      }
+
+      /**
+       * 全体回転とカメラ移動を更新して 1 フレーム描画します。
+       *
+       * @returns {void}
+       */
       function render() {
         // wrap と icon 本体を別々に回すと全体と個体の動きが分かれます。
         wraps.forEach((wrap, index) => {
           wrap.rotation.y += ((index / wraps.length) * Math.PI) / 180;
         });
 
-        words.forEach((word) => {
-          word.rotation.y += (0.5 * Math.PI) / 180;
+        iconMeshes.forEach((iconMesh) => {
+          iconMesh.rotation.y += (0.5 * Math.PI) / 180;
         });
 
         // カメラを周回させて空間全体を見せます。
@@ -115,6 +159,11 @@
         renderer.render(scene, camera);
       }
 
+      /**
+       * 画面サイズの変化に合わせて投影行列と描画サイズを更新します。
+       *
+       * @returns {void}
+       */
       function handleResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();

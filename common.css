@@ -100,3 +100,25 @@ canvas {
     line-height: 1.4;
   }
 }
+
+.jp-copy {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  min-height: 100vh;
+  padding: 32px;
+  font-family: "Reggae One", sans-serif;
+  text-align: center;
+
+  span {
+    font-size: clamp(72px, 10vw, 132px);
+    line-height: 1.15;
+  }
+
+  small {
+    color: #556070;
+    font-family: sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+}

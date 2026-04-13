@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>4. WebGPUの平面へ展開</title>
+    <title>22. WebGPUで単体アイコンを表示</title>
     <link rel="stylesheet" href="common.css" />
     <script type="importmap">
       {
@@ -14,8 +14,10 @@
     </script>
     <script type="module">
       import * as THREE from "three/webgpu";
-      import { loadIconFont } from "./fontawesome-font.js";
-      import { singleIconUnicode } from "./fontawesome-list.js";
+      import { loadIconFont } from "./font-fontawesome.js";
+      import { singleIcon } from "./font-fontawesome-list.js";
+
+      const ICON_COLOR = 0x5c86ff;
 
       // scene はオブジェクト全体の入れ物です。
       const scene = new THREE.Scene();
@@ -44,7 +46,7 @@
       await loadIconFont();
 
       // フォント読み込み後に texture と mesh を作ります。
-      const mesh = init();
+      const iconMesh = init();
 
       // アニメーションループの中で毎フレーム回転させます。
       renderer.setAnimationLoop(render);
@@ -55,13 +57,6 @@
        * @returns {THREE.Mesh}
        */
       function init() {
-        // アイコンの Unicode を指定します。
-        const iconUnicode = singleIconUnicode;
-        // Unicode から文字コードに変換します。
-        const iconInt = parseInt(iconUnicode, 16);
-        // 文字コードから文字列に変換します。
-        const iconStr = String.fromCodePoint(iconInt);
-
         // Canvas 要素へ描いた glyph を texture の元データにします。
         const iconCanvas = document.createElement("canvas");
         const iconContext = iconCanvas.getContext("2d");
@@ -70,25 +65,23 @@
         iconCanvas.width = 256;
         iconCanvas.height = 256;
         iconContext.font = '900 200px "Font Awesome 7 Free"';
-        iconContext.fillStyle = "#00f";
+        iconContext.fillStyle = "#ffffff";
         iconContext.textAlign = "center";
         iconContext.textBaseline = "middle";
-        iconContext.fillText(iconStr, 128, 128);
+        iconContext.fillText(singleIcon, 128, 128);
 
-        // Three.js のテクスチャへ展開します。
+        // Canvas の内容をそのまま平面テクスチャへ変換します。
         const texture = new THREE.CanvasTexture(iconCanvas);
         texture.needsUpdate = true;
-
-        // 平面を作成します。
         const geometry = new THREE.PlaneGeometry(40, 40);
         const material = new THREE.MeshBasicMaterial({
+          color: ICON_COLOR,
           map: texture,
           transparent: true,
           side: THREE.DoubleSide,
         });
-
-        // メッシュを作成して 3D 空間へ追加します。
         const nextMesh = new THREE.Mesh(geometry, material);
+
         nextMesh.position.y = 12;
         scene.add(nextMesh);
         return nextMesh;
@@ -101,8 +94,8 @@
 
       function render() {
         // x と y の両方を回すと平面でも立体感が出ます。
-        mesh.rotation.x += 0.01;
-        mesh.rotation.y += 0.02;
+        iconMesh.rotation.x += 0.01;
+        iconMesh.rotation.y += 0.02;
 
         // 視点は icon と床の中間を見るように固定します。
         camera.lookAt(0, 8, 0);

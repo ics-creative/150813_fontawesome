@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>11. Canvasで日本語を描画</title>
+    <link rel="stylesheet" href="common.css" />
+    <script type="module">
+      import { loadReggaeOneFont } from "./font-reggae-one.js";
+
+      const DESIGN_WIDTH = 960;
+      const DESIGN_HEIGHT = 540;
+      const headlineText = "日本語";
+      const subText = "ウェブフォント";
+      const techText = "Canvas 2D";
+
+      // 描画先の canvas と 2D context を取得します。
+      const canvas = document.querySelector("#myCanvas");
+      const context = canvas.getContext("2d");
+
+      // Google Fonts 配信のフォントファイルを FontFace で登録してから描画します。
+      await loadReggaeOneFont();
+
+      // CSS 上の表示サイズと backing store を分けて、高解像度画面でも滲まないようにします。
+      window.addEventListener("resize", render);
+      render();
+
+      function render() {
+        const { cssWidth, cssHeight, scale } = resizeCanvas();
+
+        // いったん消してから、CSS px 基準で文字を描き直します。
+        context.clearRect(0, 0, cssWidth, cssHeight);
+        context.fillStyle = "#111111";
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.font = `${140 * scale}px "Reggae One"`;
+        context.fillText(headlineText, cssWidth / 2, 170 * scale);
+
+        context.font = `${80 * scale}px "Reggae One"`;
+        context.fillText(subText, cssWidth / 2, 300 * scale);
+
+        context.font = `${52 * scale}px "Reggae One"`;
+        context.fillText(techText, cssWidth / 2, 420 * scale);
+      }
+
+      function resizeCanvas() {
+        const pixelRatio = window.devicePixelRatio || 1;
+        const cssWidth = canvas.clientWidth || DESIGN_WIDTH;
+        const cssHeight = canvas.clientHeight || DESIGN_HEIGHT;
+
+        canvas.width = Math.round(cssWidth * pixelRatio);
+        canvas.height = Math.round(cssHeight * pixelRatio);
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+        return {
+          cssWidth,
+          cssHeight,
+          scale: cssWidth / DESIGN_WIDTH,
+        };
+      }
+    </script>
+  </head>
+  <body>
+    <canvas
+      id="myCanvas"
+      width="960"
+      height="540"
+      style="display: block; width: min(100vw, 960px); height: auto; background: #fff"
+    ></canvas>
+  </body>
+</html>
