@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ウェブフォントをDOM、Canvas、WebGPUで使うサンプル</title>
+    <link rel="stylesheet" href="common.css" />
+  </head>
+  <body class="is-home">
+    <main class="home">
+      <h1>ウェブフォントをDOM、Canvas、WebGPUで使うサンプル</h1>
+      <p>
+        ウェブフォントをDOM、Canvas、WebGPUで扱う各ページの一覧です。Font
+        Awesomeは表示例として使っています。
+      </p>
+      <section class="home__group">
+        <h2>DOM</h2>
+        <div class="home__list">
+          <a class="home__card" href="1_simple.html">
+            <strong>1. DOMで表示</strong>
+            <p>ブラウザー上でアイコンフォントを表示します。</p>
+          </a>
+        </div>
+      </section>
+      <section class="home__group">
+        <h2>Canvas 2D</h2>
+        <div class="home__list">
+          <a class="home__card" href="2_canvas.html">
+            <strong>2. Canvasで単体を描画</strong>
+            <p>Canvasに単体アイコンを大きく描画します。</p>
+          </a>
+          <a class="home__card" href="3_canvas_all.html">
+            <strong>3. Canvasで一覧を描画</strong>
+            <p>Canvasに複数のグリフを一覧で描画します。</p>
+          </a>
+        </div>
+      </section>
+      <section class="home__group">
+        <h2>Three.js</h2>
+        <div class="home__list">
+          <a class="home__card" href="4_threejs.html">
+            <strong>4. WebGPUで単体を表示</strong>
+            <p>WebGPUの平面に単体アイコンを配置して表示します。</p>
+          </a>
+          <a class="home__card" href="5_threejs_all.html">
+            <strong>5. WebGPUで一覧を表示</strong>
+            <p>WebGPU空間に多数のアイコンを配置して表示します。</p>
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

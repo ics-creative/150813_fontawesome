@@ -1,13 +1,11 @@
 {
+  "private": true,
   "scripts": {
-    "format": "prettier --write '*.{js,css}'"
+    "format": "oxfmt .",
+    "preview": "http-server -p 4173 -c-1 ."
   },
-  "dependencies": {
-    "@types/createjs": "^0.0.29",
-    "@types/three": "^0.92.3",
-    "@types/webfontloader": "^1.6.29",
-    "prettier": "^1.13.4",
-    "typescript": "^2.9.1"
-  },
-  "private": true
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "oxfmt": "^0.45.0"
+  }
 }

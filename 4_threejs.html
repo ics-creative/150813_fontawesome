@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>4. WebGPUの平面へ展開</title>
+    <link rel="stylesheet" href="common.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.webgpu.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three/webgpu";
+      import { loadIconFont } from "./fontawesome-font.js";
+      import { singleIconUnicode } from "./fontawesome-list.js";
+
+      // scene はオブジェクト全体の入れ物です。
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x000000);
+
+      // camera は表示する範囲と視点を決めます。
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        1,
+        1000,
+      );
+      camera.position.set(0, 18, 100);
+
+      // renderer が WebGPU へ実際の描画を流します。
+      const renderer = new THREE.WebGPURenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      await renderer.init();
+
+      // リサイズ時は camera と renderer の両方を更新します。
+      window.addEventListener("resize", handleResize);
+
+      // Canvas へ glyph を描く前に webfont を確定させます。
+      await loadIconFont();
+
+      // フォント読み込み後に texture と mesh を作ります。
+      const mesh = init();
+
+      // アニメーションループの中で毎フレーム回転させます。
+      renderer.setAnimationLoop(render);
+
+      /**
+       * コンテンツを初期化します。
+       *
+       * @returns {THREE.Mesh}
+       */
+      function init() {
+        // アイコンの Unicode を指定します。
+        const iconUnicode = singleIconUnicode;
+        // Unicode から文字コードに変換します。
+        const iconInt = parseInt(iconUnicode, 16);
+        // 文字コードから文字列に変換します。
+        const iconStr = String.fromCodePoint(iconInt);
+
+        // Canvas 要素へ描いた glyph を texture の元データにします。
+        const iconCanvas = document.createElement("canvas");
+        const iconContext = iconCanvas.getContext("2d");
+
+        // texture 用 canvas は固定サイズで用意します。
+        iconCanvas.width = 256;
+        iconCanvas.height = 256;
+        iconContext.font = '900 200px "Font Awesome 7 Free"';
+        iconContext.fillStyle = "#00f";
+        iconContext.textAlign = "center";
+        iconContext.textBaseline = "middle";
+        iconContext.fillText(iconStr, 128, 128);
+
+        // Three.js のテクスチャへ展開します。
+        const texture = new THREE.CanvasTexture(iconCanvas);
+        texture.needsUpdate = true;
+
+        // 平面を作成します。
+        const geometry = new THREE.PlaneGeometry(40, 40);
+        const material = new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+
+        // メッシュを作成して 3D 空間へ追加します。
+        const nextMesh = new THREE.Mesh(geometry, material);
+        nextMesh.position.y = 12;
+        scene.add(nextMesh);
+        return nextMesh;
+      }
+
+      // 単体デモでも空間の基準が見えるように床を追加します。
+      const grid = new THREE.GridHelper(240, 12);
+      grid.position.y = -24;
+      scene.add(grid);
+
+      function render() {
+        // x と y の両方を回すと平面でも立体感が出ます。
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.02;
+
+        // 視点は icon と床の中間を見るように固定します。
+        camera.lookAt(0, 8, 0);
+        renderer.render(scene, camera);
+      }
+
+      function handleResize() {
+        // 画面サイズの変化に合わせて投影行列を作り直します。
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    </script>
+  </head>
+  <body class="is-scene"></body>
+</html>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>5. WebGPU空間に並べる</title>
+    <link rel="stylesheet" href="common.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.webgpu.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three/webgpu";
+      import { loadIconFont } from "./fontawesome-font.js";
+      import { loadDemoUnicodes } from "./fontawesome-list.js";
+
+      // 回転の半径とカメラの周回半径を定数でまとめます。
+      const ROUND = 2000;
+      const CAMERA_POSITION = 2500;
+      const COLOR_LIST = [0x003399, 0x0066cc, 0x0099ff, 0x33ccff];
+      const wraps = [];
+      const words = [];
+
+      // 一覧用の unicode 群を先に取得します。
+      const demoUnicodes = await loadDemoUnicodes();
+
+      // glyph を canvas へ描く前に webfont を準備します。
+      await loadIconFont();
+
+      // scene はアイコン群と床グリッドの入れ物です。
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x000000);
+
+      // camera は広い空間全体を見渡せる値にしています。
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        1,
+        200000,
+      );
+
+      const renderer = new THREE.WebGPURenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+      await renderer.init();
+
+      demoUnicodes.forEach((unicode) => {
+        // 各 glyph を個別の canvas texture にして plane へ貼ります。
+        const iconCanvas = document.createElement("canvas");
+        const iconContext = iconCanvas.getContext("2d");
+
+        // 1 glyph ごとに同じ texture サイズを使います。
+        iconCanvas.width = 256;
+        iconCanvas.height = 256;
+        iconContext.font = '900 200px "Font Awesome 7 Free"';
+        iconContext.fillStyle = "#ffffff";
+        iconContext.textAlign = "center";
+        iconContext.textBaseline = "middle";
+        iconContext.fillText(String.fromCodePoint(parseInt(unicode, 16)), 128, 128);
+
+        const texture = new THREE.CanvasTexture(iconCanvas);
+        const geometry = new THREE.PlaneGeometry(200, 200);
+        const material = new THREE.MeshBasicMaterial({
+          color: COLOR_LIST[(COLOR_LIST.length * Math.random()) >> 0],
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+
+        mesh.position.z = 1000 * Math.random() + 500;
+        mesh.rotation.y = Math.PI * 2 * Math.random();
+        mesh.scale.multiplyScalar(0.5 * Math.random() + 0.5);
+
+        const wrap = new THREE.Object3D();
+        wrap.position.y = ROUND * Math.random();
+        wrap.add(mesh);
+
+        // 全体回転用の wrap と個別回転用の mesh を別配列で持ちます。
+        wraps.push(wrap);
+        words.push(mesh);
+        scene.add(wrap);
+      });
+
+      // 床グリッドを置くと回転移動の基準が見やすくなります。
+      const grid = new THREE.GridHelper(4000, 20);
+      grid.position.y = -30;
+      scene.add(grid);
+
+      // リサイズ後も広い空間が崩れないように追従させます。
+      window.addEventListener("resize", handleResize);
+
+      // 毎フレーム、全体回転とカメラ移動を更新します。
+      renderer.setAnimationLoop(render);
+      function render() {
+        // wrap と icon 本体を別々に回すと全体と個体の動きが分かれます。
+        wraps.forEach((wrap, index) => {
+          wrap.rotation.y += ((index / wraps.length) * Math.PI) / 180;
+        });
+
+        words.forEach((word) => {
+          word.rotation.y += (0.5 * Math.PI) / 180;
+        });
+
+        // カメラを周回させて空間全体を見せます。
+        camera.position.x = CAMERA_POSITION * Math.sin(Date.now() / 1000);
+        camera.position.z = CAMERA_POSITION * Math.cos(Date.now() / 1000);
+        camera.position.y = 100 + 50 * Math.cos(Date.now() / 2000);
+        camera.lookAt(new THREE.Vector3(0, 200, 0));
+
+        renderer.render(scene, camera);
+      }
+
+      function handleResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    </script>
+  </head>
+  <body class="is-scene"></body>
+</html>

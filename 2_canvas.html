@@ -1,21 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="common.css" />
+    <title>Canvasに単体アイコンを描画</title>
+    <script type="module">
+      import { loadIconFont } from "./fontawesome-font.js";
+      import { singleIconUnicode } from "./fontawesome-list.js";
 
-<head>
-	<meta charset="UTF-8" />
-	<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css" />
-	<link rel="stylesheet" href="common.css" />
-	<title></title>
-	<style>
-		body {
-			font-size: 10rem;
-		}
-	</style>
-	<script defer src="2_canvas.js"></script>
-</head>
+      // 描画先の canvas と 2D context を取得します。
+      const canvas = document.querySelector("#myCanvas");
+      const context = canvas.getContext("2d");
 
-<body>
-	<canvas id="myCanvas" width="960" height="540" style="background: #fff;"></canvas>
-</body>
+      // Font Awesome の webfont が使える状態になるまで待ちます。
+      await loadIconFont();
 
+      // unicode を 1 文字へ変換して、大きな glyph をそのまま描きます。
+      const icon = String.fromCodePoint(parseInt(singleIconUnicode, 16));
+
+      // font / fillStyle / textBaseline を決めると Canvas 上の文字描画が安定します。
+      context.font = '900 540px "Font Awesome 7 Free"';
+      context.fillStyle = "#000000";
+      context.textBaseline = "top";
+      context.fillText(icon, 0, 0);
+    </script>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="960" height="540" style="background: #fff"></canvas>
+  </body>
 </html>
