@@ -9,18 +9,18 @@ const REGGAE_ONE_SOURCE =
  *
  * @returns {Promise<void>}
  */
-export async function loadReggaeOneFont() {
+export async function loadFontReggaeOne() {
   // Google Fonts 配信の ttf を FontFace として生成します。
-  const reggaeOneFont = new FontFace("Reggae One", REGGAE_ONE_SOURCE, {
+  const fontFace = new FontFace("Reggae One", REGGAE_ONE_SOURCE, {
     style: "normal",
     weight: "400",
   });
 
   // バイナリの取得と解析が終わるまで待ちます。
-  const loadedReggaeOneFont = await reggaeOneFont.load();
+  const loadedFontFace = await fontFace.load();
 
   // 読み込み済みの font を document 配下へ登録します。
-  document.fonts.add(loadedReggaeOneFont);
+  document.fonts.add(loadedFontFace);
 
   // 登録後に利用可能状態へ入るまで待ってから呼び出し元へ返します。
   await document.fonts.ready;

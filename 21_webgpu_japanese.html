@@ -14,7 +14,7 @@
     </script>
     <script type="module">
       import * as THREE from "three/webgpu";
-      import { loadReggaeOneFont } from "./font-reggae-one.js";
+      import { loadFontReggaeOne } from "./font-reggae-one.js";
 
       const sampleText = "日本語";
       const subText = "WebGPU";
@@ -43,7 +43,7 @@
       window.addEventListener("resize", handleResize);
 
       // Google Fonts 配信のフォントファイルを FontFace で登録してから描画します。
-      await loadReggaeOneFont();
+      await loadFontReggaeOne();
 
       // フォント読み込み後に texture と mesh を作ります。
       const mesh = init();

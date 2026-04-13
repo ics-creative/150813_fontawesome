@@ -6,7 +6,7 @@
     <title>11. Canvasで日本語を描画</title>
     <link rel="stylesheet" href="common.css" />
     <script type="module">
-      import { loadReggaeOneFont } from "./font-reggae-one.js";
+      import { loadFontReggaeOne } from "./font-reggae-one.js";
 
       const DESIGN_WIDTH = 960;
       const DESIGN_HEIGHT = 540;
@@ -19,7 +19,7 @@
       const context = canvas.getContext("2d");
 
       // Google Fonts 配信のフォントファイルを FontFace で登録してから描画します。
-      await loadReggaeOneFont();
+      await loadFontReggaeOne();
 
       // CSS 上の表示サイズと backing store を分けて、高解像度画面でも滲まないようにします。
       window.addEventListener("resize", render);
